@@ -60,16 +60,15 @@ public class Echiquier {
 		return false;
 	}
 
-	public boolean jeuCourantEnEchec() {
+	public boolean isCheck(Coord coordCheck) {
 		boolean res = false;
 		check = !check;
 		Jeu jeuC = jeuCourant?jeuBlanc:jeuNoir;
 		Jeu jeunC = !jeuCourant?jeuBlanc:jeuNoir;
-		Coord kingPos=jeuC.getKingCoord();
 		jeuCourant = !jeuCourant;
 		for(PieceIHM piece : jeunC.getPiecesIHM()) {
 			for(Coord coord : piece.getList()) {
-				if(isMoveOk(coord.x,coord.y,kingPos.x,kingPos.y)) {
+				if(isMoveOk(coord.x,coord.y,coordCheck.x,coordCheck.y)) {
 					res=true;
 				}
 			}
@@ -79,19 +78,43 @@ public class Echiquier {
 		return res;
 	}
 	
-	public boolean isMoveOk(int xInit, int yInit, int xFinal, int yFinal) {
+	public Type MoveType(int xInit, int yInit, int xFinal, int yFinal) {
+		Couleur couleurPieceI = getPieceColor(xInit,yInit);
+		Couleur couleurPieceF = getPieceColor(xFinal,yFinal);
+		Type res = Type.RIEN;
+		if(couleurPieceI!=couleurPieceF && couleurPieceF!=null)
+		{
+			res = Type.CAPTURE;
+		}
+		else if(couleurPieceI==couleurPieceF && couleurPieceF!=null)
+		{
+			res = Type.CASTLING;
+		}
+
+		return res;
+	}
+	
+public boolean isMoveOk(int xInit, int yInit, int xFinal, int yFinal) {
 		Couleur couleurPiece = getPieceColor(xInit,yInit);
 		boolean res = false;
-		if(jeuCourant&&couleurPiece==Couleur.BLANC||!jeuCourant&&couleurPiece==Couleur.NOIR) {
-			if(xFinal < 8 && xFinal > -1 && yFinal > -1 && yFinal < 8) {
+		if(jeuCourant&&couleurPiece==Couleur.BLANC||!jeuCourant&&couleurPiece==Couleur.NOIR) { // on vérifie qe la couleur de la pièce est bien celle du jeu courant
+			if(xFinal < 8 && xFinal > -1 && yFinal > -1 && yFinal < 8) { // On vérifie si on reste sur le plateau
 				if(!(xInit == xFinal && yInit == yFinal)) {
 					Jeu jeuC = jeuCourant?jeuBlanc:jeuNoir;
-					res = jeuC.isMoveOk(xInit, yInit, xFinal, yFinal);
+					Type type = MoveType(xInit, yInit, xFinal, yFinal);
+					res = jeuC.isMoveOk(xInit, yInit, xFinal, yFinal,type); // On vérifie si au niveau du jeu le déplacement est légal
 					if(res) {
 						
 						Jeu jeunC = !jeuCourant?jeuBlanc:jeuNoir;
 						List<Coord> lc=jeuC.Path(xInit, yInit, xFinal, yFinal);
 						for(Coord coord : lc) {
+							if(type==Type.CASTLING) {
+								if(isCheck(coord))
+								{
+									res=false;
+									this.setMessage("KO : Roque impossible par echec");
+								}
+							}
 							if(jeunC.isPieceHere(coord.x, coord.y)) {
 								if(!(coord.x==xFinal&&coord.y==yFinal)) {
 									res=false;
@@ -120,48 +143,54 @@ public class Echiquier {
 	}
 
 	public boolean move(int xInit, int yInit, int xFinal, int yFinal) {
-		// TODO Auto-generated method stub
 		boolean res=false;
-		res=jeuCourant?jeuBlanc.move(xInit, yInit, xFinal, yFinal):jeuNoir.move(xInit, yInit, xFinal, yFinal);
-		if(res) {
-			Jeu jeunC = !jeuCourant?jeuBlanc:jeuNoir;
-			if(jeunC.isPieceHere(xFinal, yFinal)) {
-				jeunC.capture(xFinal, yFinal);
-				this.setMessage("OK : deplacement + capture ");
-			}
-			else {
-				this.setMessage("OK : deplacement simple");
-			}
+		Type type = MoveType(xInit, yInit, xFinal, yFinal);
+		if(type==Type.CASTLING)
+		{
+			res=jeuCourant?jeuBlanc.setCastling(xInit, yInit, xFinal, yFinal):jeuNoir.setCastling(xInit, yInit, xFinal, yFinal);
+			this.setMessage("OK : Roque ");
 		}
-		if(jeuCourantEnEchec()){
-			res = false;
-			this.setMessage("KO : se deplacement met/laisse le joueur "+this.getColorCurrentPlayer()+" en echec");
-			if(jeuCourant){jeuBlanc.undoMove();}
-			else{jeuNoir.undoMove();}
+		else 
+		{
+			res=jeuCourant?jeuBlanc.move(xInit, yInit, xFinal, yFinal):jeuNoir.move(xInit, yInit, xFinal, yFinal);
+			if(res) {
+				Jeu jeunC = !jeuCourant?jeuBlanc:jeuNoir;
+				if(jeunC.isPieceHere(xFinal, yFinal)) {
+					jeunC.capture(xFinal, yFinal);
+					this.setMessage("OK : deplacement + capture ");
+				}
+				else {
+					this.setMessage("OK : deplacement simple");
+				}
+			}
+			Jeu jeuC = jeuCourant?jeuBlanc:jeuNoir;
+			if(isCheck(jeuC.getKingCoord())){
+				res = false;
+				this.setMessage("KO : se deplacement met/laisse le joueur "+this.getColorCurrentPlayer()+" en echec");
+				if(jeuCourant){jeuBlanc.undoMove();}
+				else{jeuNoir.undoMove();}
+			}
 		}
 		return res;
 	}
 
 	public void switchJoueur() {
-		// TODO Auto-generated method stub
-		jeuCourant=!jeuCourant;
-		if(jeuCourantEnEchec())
+		Jeu jeuC = jeuCourant?jeuBlanc:jeuNoir;
+		if(isCheck(jeuC.getKingCoord()))
 		{
 			this.setMessage("Le joueur "+this.getColorCurrentPlayer()+" est en echec");
 			
 		}
+		jeuCourant=!jeuCourant;
 	}
 	
 	public static void main(String[] args) {
 		Echiquier jeu = new Echiquier();
-		jeu.move(3, 7, 4, 4);
-		jeu.switchJoueur();
-		jeu.move(3, 0, 3, 4);
-		jeu.switchJoueur();
-		System.out.println(jeu.isMoveOk(4, 4, 0, 4));
-		System.out.println(jeu.isMoveOk(4, 4, 3, 4));
-		jeu.move(4, 4, 3, 4);
-		System.out.println(jeu.getMessage());
+		System.out.println(jeu.move(4, 6, 4, 4));
+		System.out.println(jeu.move(5,7,4, 6));
+		System.out.println(jeu.move(6,7,7,5));
+		System.out.println(jeu.isMoveOk(4,7,7,7));
+		
 		
 	}
 

@@ -9,6 +9,7 @@ public interface Pieces {
 	int getX();
 	int getY();
 	boolean isMoveOk(int xFinal, int yFinal);
+	boolean isMoveOk(int xFinal, int yFinal,Type type );
 	boolean move(int xFinal, int yFinal);
 	List<Coord> Path(int xFinal, int yFinal);
 }

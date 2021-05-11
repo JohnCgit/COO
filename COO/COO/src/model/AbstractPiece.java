@@ -59,10 +59,11 @@ public abstract class AbstractPiece implements Pieces {
 	
 	public final boolean isMoveOk(int xFinal,int yFinal)
 	{
-		if(xFinal == getX() && yFinal == getY())
-		{
-			return false;
-		}
-		return isAlgoMoveOk(xFinal,yFinal);
+		return xFinal == getX() && yFinal == getY()?false:isAlgoMoveOk(xFinal,yFinal);
+	}
+	
+	public boolean isMoveOk(int xFinal,int yFinal,Type type)
+	{
+		return isMoveOk(xFinal,yFinal);
 	}
 }

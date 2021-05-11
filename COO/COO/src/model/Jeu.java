@@ -14,7 +14,6 @@ public class Jeu {
 	private Deque<List<Coord>> listMove;
 	//private Deque<Coord,Pieces> listCapture;
 	private Couleur couleur;
-	//private boolean castling = true;
 	
 	public Jeu(Couleur couleur) 
 	{
@@ -56,21 +55,65 @@ public class Jeu {
 		return res;
 	}
 	
-	public boolean isMoveOk(int xInit, int yInit, int xFinal, int yFinal) {
+	public boolean isMoveOk(int xInit, int yInit, int xFinal, int yFinal,Type type) {
 		boolean res = false;
 		if (isPieceHere(xInit,yInit)) {
 			Pieces piece = findPiece(xInit, yInit);
-			
-			res = piece.isMoveOk(xFinal, yFinal);
-			if(res) {
-				List<Coord> lc = piece.Path(xFinal, yFinal);
-				for(Coord coord : lc) {
-					if(isPieceHere(coord.x,coord.y)) {
-						res=false;
+			if( type==Type.CASTLING) {
+				res=isCastlingOk(xInit, yInit,xFinal, yFinal);
+			}
+			else 
+			{
+				res = piece.isMoveOk(xFinal, yFinal,type);
+				if(res) 
+				{
+					List<Coord> lc = piece.Path(xFinal, yFinal);
+					for(Coord coord : lc) 
+					{
+						if(isPieceHere(coord.x,coord.y)) 
+						{
+							res=false;
+						}
 					}
 				}
 			}
 		}
+		return res;
+	}
+	
+	private boolean isCastlingOk(int xInit, int yInit, int xFinal, int yFinal) {
+		boolean res=false;
+		Coord KingCoord = getKingCoord();
+		if(KingCoord.equals(new Coord(xInit,yInit))) 
+		{
+			if (getPieceType(xFinal,yFinal).compareTo("Tour")==0) 
+			{
+				Roi roi = (Roi) findPiece(KingCoord.x,KingCoord.y);
+				Tour tour = (Tour) findPiece(xFinal,yFinal);
+				if(!roi.getHasMoved()&&!tour.getHasMoved()) 
+				{
+					res = true;
+					int dir = Math.abs(xInit-xFinal) / (xFinal-xInit);
+					for(int x=xInit+dir;Math.abs(x-xFinal)>0;x += dir )
+					{
+						if (isPieceHere(x,yInit))
+						{
+							res = false;
+						}
+					}
+				}
+			}
+		}
+		return res;
+	}
+
+	public boolean setCastling(int xInit, int yInit, int xFinal, int yFinal) {
+		boolean res= false;
+		int xK,xT;
+		int dir = Math.abs(xInit-xFinal) / (xFinal-xInit);
+		xK=xInit+2*dir;
+		xT=xInit+dir;
+		res=move(xInit,yInit,xK,yInit)&&move(xFinal,yFinal,xT,yFinal);
 		return res;
 	}
 	
@@ -157,9 +200,8 @@ public class Jeu {
 	return list;
 	}
 	
-//	public void setCastling() {
-//	}
-//	
+	
+	
 	public void undoMove() {
 	
 		List<Coord> listCoord = listMove.pop();
@@ -216,12 +258,10 @@ public class Jeu {
 	
 	public static void main(String[] args) {
 		Jeu jeu = new Jeu(Couleur.BLANC);
-		jeu.move(0, 6, 0, 5);
-		System.out.println(jeu.isMoveOk(0, 7, 0, 6));
+		System.out.println(jeu.isMoveOk(0, 6, 0, 5,Type.RIEN));
 	}
 
 	public List<Coord> Path(int xInit, int yInit, int xFinal, int yFinal) {
-		// TODO Auto-generated method stub
 		return findPiece(xInit,yInit).Path(xFinal, yFinal);
 	}
 }

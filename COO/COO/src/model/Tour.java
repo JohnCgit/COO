@@ -3,8 +3,9 @@ package model;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Tour extends AbstractPiece {
+public class Tour extends AbstractPiece implements LazyAss {
 
+	private boolean HasMoved = false;
 	public Tour(Couleur couleur, Coord coord) {
 		super(couleur,coord);
 		// TODO Auto-generated constructor stub
@@ -31,16 +32,30 @@ public static void main(String[] args)
 
 @Override
 public boolean isAlgoMoveOk(int xFinal, int yFinal) {
-	// TODO Auto-generated method stub
 	boolean res=false;
 	if ( xFinal == getX() || yFinal == getY() ){
 		res=true;
+		HasMoved=true;
 	}
 	return res;
 }
 
 
-
+public boolean isMoveOk(int xFinal, int yFinal, Type type) {
+	
+	boolean res=false;
+	if(type==Type.CASTLING) {
+		
+		HasMoved=true;
+	}
+	else //type==Rien
+	{
+		res=isMoveOk(xFinal,yFinal);
+	}
+	
+	
+	return res;
+}
 
 @Override
 public List<Coord> Path(int xFinal, int yFinal) {
@@ -65,6 +80,22 @@ public List<Coord> Path(int xFinal, int yFinal) {
 		}	
 	}
 	return Path;
+}
+
+
+
+
+@Override
+public void setHasMoved(boolean b) {
+	HasMoved = b;
+}
+
+
+
+
+@Override
+public boolean getHasMoved() {
+	return HasMoved;
 }
 
 

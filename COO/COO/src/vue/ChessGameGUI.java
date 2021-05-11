@@ -54,22 +54,26 @@ implements java.awt.event.MouseListener, java.awt.event.MouseMotionListener, jav
 		  chessBoard.setLayout( new GridLayout(8, 8) );
 		  chessBoard.setPreferredSize( dim );
 		  chessBoard.setBounds(0, 0, dim.width, dim.height);
-		 
-		  for (int i = 0; i < 64; i++) {
-		  JPanel square = new JPanel( new BorderLayout() );
-		  chessBoard.add( square );
-		 
-		  int row = (i / 8) % 2;
-		  if (row == 0)
-		  square.setBackground( i % 2 == 0 ? Color.BLACK : Color.white );
-		  else
-		  square.setBackground( i % 2 == 0 ? Color.white : Color.BLACK );
-		  }
+		  refresh();
 	}
 
+	public void refresh() {
+		chessBoard.removeAll();
+		for (int i = 0; i < 64; i++) {
+			  JPanel square = new JPanel( new BorderLayout() );
+			  chessBoard.add( square );
+			 
+			  int row = (i / 8) % 2;
+			  if (row == 0)
+			  square.setBackground( i % 2 == 0 ? Color.BLACK : Color.white );
+			  else
+			  square.setBackground( i % 2 == 0 ? Color.white : Color.BLACK );
+		}
+	}
 	@Override
 	public void update(Observable arg0, Object arg1) {
 		System.out.print(chessGameControler.getMessage()+'\n');
+		refresh();
 		List<PieceIHM> piecesIHM = (List<PieceIHM>) arg1;
 		for(PieceIHM pieceIHM : piecesIHM) {
 			String file = ChessImageProvider.getImageFile(pieceIHM.getTypePiece(),pieceIHM.getCouleur());
@@ -83,6 +87,7 @@ implements java.awt.event.MouseListener, java.awt.event.MouseMotionListener, jav
 					}
 				}
 		}
+		repaint();
 	}
 
 	@Override
@@ -129,17 +134,16 @@ implements java.awt.event.MouseListener, java.awt.event.MouseMotionListener, jav
 		  xFinal=(int)Math.round(parentLocation.x/(dim.width/8));
 		  yFinal=(int)Math.round(parentLocation.y/(dim.height/8));
 		  boolean res=chessGameControler.move(new Coord(xInit,yInit), new Coord(xFinal,yFinal));
-		  if(res) {
-			  parent.remove(0);
-			  parent.add( chessPiece );
-		  }
-		 
-		  else {
-			JPanel panel = (JPanel)chessBoard.getComponent(xInit+yInit*8);
-			panel.add(chessPiece);
-			  
-		  }
-		  chessPiece.setVisible(true);
+		  layeredPane.remove(chessPiece);
+		  repaint();
+		  /*
+			 * if(res) { parent.removeAll(); //parent.add( chessPiece ); }
+			 * 
+			 * else { JPanel panel = (JPanel)chessBoard.getComponent(xInit+yInit*8);
+			 * panel.add(chessPiece);
+			 * 
+			 * } chessPiece.setVisible(true);
+			 */
 		  }
 	
 	@Override

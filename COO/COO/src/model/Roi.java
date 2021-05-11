@@ -3,8 +3,9 @@ package model;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Roi extends AbstractPiece {
+public class Roi extends AbstractPiece implements LazyAss{
 
+	private boolean HasMoved = false;
 	public Roi(Couleur couleur, Coord coord) {
 		super(couleur,coord);
 		// TODO Auto-generated constructor stub
@@ -37,13 +38,31 @@ public boolean isAlgoMoveOk(int xFinal, int yFinal) {
 	if ( Math.abs(xFinal-getX()) <= 1 && Math.abs(yFinal-getY()) <= 1)
 	{
 		res = true;
+		HasMoved=true;
 	}
+	return res;
+}
+
+
+
+public boolean isMoveOk(int xFinal, int yFinal, Type type) {
+	
+	boolean res=false;
+	if(type==Type.CASTLING) {
+		
+		HasMoved=true;
+	}
+	else //type==Rien
+	{
+		res=isMoveOk(xFinal,yFinal);
+	}
+	
+	
 	return res;
 }
 
 @Override
 public List<Coord> Path(int xFinal, int yFinal) {
-	// TODO Auto-generated method stub
 	List<Coord> Path =new LinkedList<Coord>();
 	int xInit = getX();
 	int yInit = getY();
@@ -78,6 +97,20 @@ public List<Coord> Path(int xFinal, int yFinal) {
 		}
 	}
 	return Path;
+}
+
+
+@Override
+public boolean getHasMoved() {
+	return HasMoved;
+}
+
+
+
+
+@Override
+public void setHasMoved(boolean b) {
+	HasMoved = b;
 }
 
 }
