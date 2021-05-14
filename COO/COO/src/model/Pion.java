@@ -43,10 +43,6 @@ public boolean isAlgoMoveOk(int xFinal, int yFinal) {
 			{
 				res=((getY()+2 == yFinal)||(getY()+1 == yFinal))?true:false;
 			}
-			if(res)
-			{
-				HasMoved=true;
-			}
 			
 		}
 		else {
@@ -99,7 +95,6 @@ public boolean isMoveOk(int xFinal, int yFinal, Type type) {
 		{
 			res=(getY()+1 == yFinal && Math.abs(getX()-xFinal)==1)?true:false;
 		}
-		HasMoved=true;
 	}
 	else //type==Rien
 	{
@@ -123,5 +118,11 @@ public boolean getHasMoved() {
 	return HasMoved;
 }
 
-
+public boolean move(int xFinal,int yFinal)
+{
+	boolean res=super.move(xFinal, yFinal);
+	if(!getHasMoved())
+		setHasMoved(true);
+	return res;
+}
 }

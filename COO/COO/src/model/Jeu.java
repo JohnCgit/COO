@@ -258,7 +258,10 @@ public class Jeu {
 	
 	public static void main(String[] args) {
 		Jeu jeu = new Jeu(Couleur.BLANC);
-		System.out.println(jeu.isMoveOk(0, 6, 0, 5,Type.RIEN));
+		System.out.println(jeu.isMoveOk(0, 6, 0, 4,Type.RIEN));
+		System.out.println(jeu.move(0, 6, 0, 4));
+		System.out.println(jeu.isMoveOk(1, 6, 1, 4,Type.RIEN));
+		System.out.println(jeu.move(1, 6, 1, 4));
 	}
 
 	public List<Coord> Path(int xInit, int yInit, int xFinal, int yFinal) {

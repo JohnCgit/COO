@@ -46,7 +46,7 @@ public boolean isMoveOk(int xFinal, int yFinal, Type type) {
 	boolean res=false;
 	if(type==Type.CASTLING) {
 		
-		HasMoved=true;
+		res=!getHasMoved();
 	}
 	else //type==Rien
 	{
@@ -98,7 +98,13 @@ public boolean getHasMoved() {
 	return HasMoved;
 }
 
-
+public boolean move(int xFinal,int yFinal)
+{
+	boolean res=super.move(xFinal, yFinal);
+	if(!getHasMoved())
+		setHasMoved(true);
+	return res;
+}
 
 
 

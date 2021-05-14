@@ -63,7 +63,6 @@ public class Echiquier {
 	public boolean isCheck(Coord coordCheck) {
 		boolean res = false;
 		check = !check;
-		Jeu jeuC = jeuCourant?jeuBlanc:jeuNoir;
 		Jeu jeunC = !jeuCourant?jeuBlanc:jeuNoir;
 		jeuCourant = !jeuCourant;
 		for(PieceIHM piece : jeunC.getPiecesIHM()) {
@@ -94,7 +93,7 @@ public class Echiquier {
 		return res;
 	}
 	
-public boolean isMoveOk(int xInit, int yInit, int xFinal, int yFinal) {
+	public boolean isMoveOk(int xInit, int yInit, int xFinal, int yFinal) {
 		Couleur couleurPiece = getPieceColor(xInit,yInit);
 		boolean res = false;
 		if(jeuCourant&&couleurPiece==Couleur.BLANC||!jeuCourant&&couleurPiece==Couleur.NOIR) { // on vérifie qe la couleur de la pièce est bien celle du jeu courant
@@ -186,10 +185,8 @@ public boolean isMoveOk(int xInit, int yInit, int xFinal, int yFinal) {
 	
 	public static void main(String[] args) {
 		Echiquier jeu = new Echiquier();
-		System.out.println(jeu.move(4, 6, 4, 4));
-		System.out.println(jeu.move(5,7,4, 6));
-		System.out.println(jeu.move(6,7,7,5));
-		System.out.println(jeu.isMoveOk(4,7,7,7));
+		System.out.println(jeu.isMoveOk(0,6,0,4));
+		System.out.println(jeu.isMoveOk(1,6,1,4));
 		
 		
 	}

@@ -38,7 +38,6 @@ public boolean isAlgoMoveOk(int xFinal, int yFinal) {
 	if ( Math.abs(xFinal-getX()) <= 1 && Math.abs(yFinal-getY()) <= 1)
 	{
 		res = true;
-		HasMoved=true;
 	}
 	return res;
 }
@@ -50,7 +49,7 @@ public boolean isMoveOk(int xFinal, int yFinal, Type type) {
 	boolean res=false;
 	if(type==Type.CASTLING) {
 		
-		HasMoved=true;
+		res=!getHasMoved();
 	}
 	else //type==Rien
 	{
@@ -113,4 +112,11 @@ public void setHasMoved(boolean b) {
 	HasMoved = b;
 }
 
+public boolean move(int xFinal,int yFinal)
+{
+	boolean res=super.move(xFinal, yFinal);
+	if(!getHasMoved())
+		setHasMoved(true);
+	return res;
+}
 }
