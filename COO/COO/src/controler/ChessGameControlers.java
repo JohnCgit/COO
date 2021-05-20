@@ -29,4 +29,7 @@ public interface ChessGameControlers {
 	 */
 	public boolean isPlayerOK(Coord initCoord);
 
+	public void promotion(String s, int x, int y);
+	
+
 }

@@ -12,7 +12,7 @@ public class Jeu {
 
 	private List<Pieces> listPieces;
 	private Deque<List<Coord>> listMove;
-	//private Deque<Coord,Pieces> listCapture;
+	private Deque<Pieces> listCapture;
 	private Couleur couleur;
 	
 	public Jeu(Couleur couleur) 
@@ -20,6 +20,7 @@ public class Jeu {
 		this.couleur = couleur;
 		listPieces = ChessPiecesFactory.newPieces(couleur);
 		listMove = new ArrayDeque<List<Coord>>();
+		listCapture = new ArrayDeque<Pieces>();
 	}
 	
 	public String toString()
@@ -138,10 +139,10 @@ public class Jeu {
 		if(this.isPieceHere(xCatch, yCatch)) {
 			Pieces piece = findPiece(xCatch, yCatch);
 			res= piece.capture();
-			
-			}
-		return res;
+			listCapture.push(piece);	
 		}
+		return res;
+	}
 	
 	public Couleur getPieceColor(int x, int y)
 	{
@@ -178,18 +179,18 @@ public class Jeu {
 	boolean existe = false;
 	// si le type de piece existe déjà dans la liste de PieceIHM
 	// ajout des coordonnées de la pièce dans la liste de Coord de ce type
-	// si elle est toujours en jeu (x et y != -1)
+	// si elle est toujours en jeu (x et y >= 0)
 	for ( PieceIHM pieceIHM : list){
 	if ((pieceIHM.getTypePiece()).equals(piece.getClass().getSimpleName())){
 	existe = true;
-	if (piece.getX() != -1){
+	if (piece.getX()>=0 && piece.getY()>=0){
 	pieceIHM.add(new Coord(piece.getX(), piece.getY()));
 	}
 	}
 	}
 	// sinon, création d'une nouvelle PieceIHM si la pièce est toujours en jeu
 	if (! existe) {
-	if (piece.getX() != -1){
+	if (piece.getX()>=0 && piece.getY()>=0){
 	newPieceIHM = new PieceIHM(piece.getClass().getSimpleName(),
 	piece.getCouleur());
 	newPieceIHM.add(new Coord(piece.getX(), piece.getY()));
@@ -200,8 +201,6 @@ public class Jeu {
 	return list;
 	}
 	
-	
-	
 	public void undoMove() {
 	
 		List<Coord> listCoord = listMove.pop();
@@ -210,23 +209,21 @@ public class Jeu {
 }
 
 	public void undoCapture() {
-		/*
-		 * List<Pieces> pieceIHM = listCapture.pop(); Pieces agresseur =
-		 * pieceIHM.get(0); Pieces victime = pieceIHM.get(0); undoMove();
-		 */
-		
+		Pieces piece = listCapture.pop();
+		piece.move(-piece.getX(), -piece.getY());
 	}
 	
 	public boolean isPawnPromotion(int xFinal,int yFinal) {
 		boolean res=false;
 		if (isPieceHere(xFinal,yFinal)) {
 			if(getPieceType(xFinal,yFinal).compareTo("Pion")==0) {
-				res=(getPieceColor(xFinal,yFinal)==Couleur.BLANC && xFinal==0)||(getPieceColor(xFinal,yFinal)==Couleur.NOIR && xFinal==8-1);
+				res=(getPieceColor(xFinal,yFinal)==Couleur.BLANC && yFinal==0)||(getPieceColor(xFinal,yFinal)==Couleur.NOIR && yFinal==8-1);
 			}
 		}
 		
 		return res;
 	}
+	
 	
 	public boolean pawnPromotion(int xFinal,int yFinal,String type) {
 		boolean res = false;
@@ -236,13 +233,14 @@ public class Jeu {
 			Pieces pionApromouvoir = findPiece(xFinal, yFinal);
 		    Couleur pieceCouleur = pionApromouvoir.getCouleur();
 		    Coord pieceCoord = new Coord(xFinal,yFinal);
-			Pieces pionPromu = (Pieces) Introspection.newInstance(type,
+			Pieces pionPromu = (Pieces) Introspection.newInstance("model."+type,
 					new Object[] {pieceCouleur, pieceCoord});
 			listPieces.add(pionPromu);
 			listPieces.remove(pionApromouvoir);
 		}
 		return res;
 	}
+	
 	
 	public Coord getKingCoord() {
 		Coord res = null;
@@ -256,6 +254,7 @@ public class Jeu {
 		return res;
 	}
 	
+	
 	public static void main(String[] args) {
 		Jeu jeu = new Jeu(Couleur.BLANC);
 		System.out.println(jeu.isMoveOk(0, 6, 0, 4,Type.RIEN));
@@ -264,6 +263,7 @@ public class Jeu {
 		System.out.println(jeu.move(1, 6, 1, 4));
 	}
 
+	
 	public List<Coord> Path(int xInit, int yInit, int xFinal, int yFinal) {
 		return findPiece(xInit,yInit).Path(xFinal, yFinal);
 	}

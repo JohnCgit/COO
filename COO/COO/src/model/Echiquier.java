@@ -56,8 +56,41 @@ public class Echiquier {
 	}
 
 	public boolean isEnd() {
-		// TODO Auto-generated method stub
-		return false;
+		boolean res = true;
+		Jeu jeuC = jeuCourant?jeuBlanc:jeuNoir;
+		Jeu jeunC = !jeuCourant?jeuBlanc:jeuNoir;
+		check = !check;
+		for(PieceIHM piece : jeuC.getPiecesIHM()) {
+			for(Coord coord : piece.getList()) {
+				if(coord.x>=0) {
+					for(int x=0;x<8;x++) {
+						for(int y=0;y<8;y++) {
+							if(isMoveOk(coord.x,coord.y,x,y)) {
+								if(move(coord.x,coord.y,x,y)) {
+									res=false;
+									
+									if(MoveType(coord.x,coord.y,x,y)==Type.CAPTURE) {
+										jeunC.undoCapture();
+									}
+									jeuC.undoMove();
+									
+									break;
+								}
+							}
+						}
+						if (!res)
+							break;
+					}
+					if (!res)
+						break;
+				}
+				
+			}
+			if (!res)
+				break;
+		}
+		check = !check;
+		return res;
 	}
 
 	public boolean isCheck(Coord coordCheck) {
@@ -143,52 +176,74 @@ public class Echiquier {
 
 	public boolean move(int xInit, int yInit, int xFinal, int yFinal) {
 		boolean res=false;
+		String message="";
+		Jeu jeunC = !jeuCourant?jeuBlanc:jeuNoir;
+		Jeu jeuC = jeuCourant?jeuBlanc:jeuNoir;
 		Type type = MoveType(xInit, yInit, xFinal, yFinal);
 		if(type==Type.CASTLING)
 		{
-			res=jeuCourant?jeuBlanc.setCastling(xInit, yInit, xFinal, yFinal):jeuNoir.setCastling(xInit, yInit, xFinal, yFinal);
-			this.setMessage("OK : Roque ");
+				res=jeuC.setCastling(xInit, yInit, xFinal, yFinal);
+				message="OK : Roque ";
 		}
 		else 
 		{
-			res=jeuCourant?jeuBlanc.move(xInit, yInit, xFinal, yFinal):jeuNoir.move(xInit, yInit, xFinal, yFinal);
+			res=jeuC.move(xInit, yInit, xFinal, yFinal);
 			if(res) {
-				Jeu jeunC = !jeuCourant?jeuBlanc:jeuNoir;
+				
 				if(jeunC.isPieceHere(xFinal, yFinal)) {
 					jeunC.capture(xFinal, yFinal);
-					this.setMessage("OK : deplacement + capture ");
-				}
+					message="OK : deplacement + capture ";}
 				else {
-					this.setMessage("OK : deplacement simple");
+					message="OK : deplacement simple";
+				}
+			
+				if(isCheck(jeuC.getKingCoord())){
+					res = false;
+					message="KO : se deplacement met/laisse le joueur "+this.getColorCurrentPlayer()+" en echec";
+					if(type==Type.CAPTURE) {
+						jeunC.undoCapture();
+					}
+					jeuC.undoMove();
 				}
 			}
-			Jeu jeuC = jeuCourant?jeuBlanc:jeuNoir;
-			if(isCheck(jeuC.getKingCoord())){
-				res = false;
-				this.setMessage("KO : se deplacement met/laisse le joueur "+this.getColorCurrentPlayer()+" en echec");
-				if(jeuCourant){jeuBlanc.undoMove();}
-				else{jeuNoir.undoMove();}
+			else {
+				message="KO : collision";
 			}
+			
+		}
+		
+		if(res&&jeuC.isPawnPromotion(xFinal, yFinal))
+		{
+			message = message + "+ Promotion X:"+xFinal+" Y:"+yFinal;
+		}
+		if(!check) {
+			this.setMessage(message);
 		}
 		return res;
 	}
 
 	public void switchJoueur() {
+		jeuCourant=!jeuCourant;
 		Jeu jeuC = jeuCourant?jeuBlanc:jeuNoir;
 		if(isCheck(jeuC.getKingCoord()))
 		{
-			this.setMessage("Le joueur "+this.getColorCurrentPlayer()+" est en echec");
+			if(this.isEnd()) {
+				this.setMessage("Le joueur "+this.getColorCurrentPlayer()+" est en echec et mat");
+			}
+			else{
+				this.setMessage("Le joueur "+this.getColorCurrentPlayer()+" est en echec");
+			}
 			
 		}
-		jeuCourant=!jeuCourant;
 	}
 	
 	public static void main(String[] args) {
-		Echiquier jeu = new Echiquier();
-		System.out.println(jeu.isMoveOk(0,6,0,4));
-		System.out.println(jeu.isMoveOk(1,6,1,4));
-		
-		
+	}
+
+	
+	public void promotion(String s, int x, int y) {
+		Jeu jeunC = !jeuCourant?jeuBlanc:jeuNoir;
+		jeunC.pawnPromotion(x, y, s);
 	}
 
 }

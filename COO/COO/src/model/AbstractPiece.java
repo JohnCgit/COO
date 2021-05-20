@@ -42,7 +42,12 @@ public abstract class AbstractPiece implements Pieces {
 		
 		boolean res = false;
 		try {
-		move(-1,-1);
+		if(this.coord==new Coord(0,0)) {
+			move(-10,-10);
+		}
+		else {
+			move(-getX(),-getY());
+		}
 		res = true;
 		}
 		catch(Exception e) {}

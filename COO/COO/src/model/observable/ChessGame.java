@@ -106,4 +106,10 @@ public class ChessGame extends Observable implements BoardGames{
 		super.addObserver(o);
 		this.notifyObservers(echiquier.getPiecesIHM()); 
 	}
+
+
+	public void promotion(String s, int x, int y) {
+		echiquier.promotion(s,x,y);
+		
+	}
 }

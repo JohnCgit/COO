@@ -40,5 +40,12 @@ public class ChessGameControler extends AbstractChessGameControler {
 		
 	}
 
+	@Override
+	public void promotion(String s, int x, int y) {
+		// TODO Auto-generated method stub
+		chessGame.promotion(s,x,y);
+		
+	}
+
 	
 }

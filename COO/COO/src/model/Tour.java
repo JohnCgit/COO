@@ -35,7 +35,6 @@ public boolean isAlgoMoveOk(int xFinal, int yFinal) {
 	boolean res=false;
 	if ( xFinal == getX() || yFinal == getY() ){
 		res=true;
-		HasMoved=true;
 	}
 	return res;
 }

@@ -10,11 +10,14 @@ import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.Observable;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import controler.ChessGameControlers;
@@ -70,16 +73,59 @@ implements java.awt.event.MouseListener, java.awt.event.MouseMotionListener, jav
 			  square.setBackground( i % 2 == 0 ? Color.white : Color.BLACK );
 		}
 	}
+	
+	
+	public void analyseM(String m) {
+		System.out.print(m+'\n');
+		if(m.contains("Promotion")) {
+			Pattern p = Pattern.compile("[0-9]+");
+			Matcher ma = p.matcher(m);
+			ma.find();
+			int x = Integer.valueOf(ma.group());
+			ma.find();
+			int y = Integer.valueOf(ma.group());
+			
+			Object[] possibilities = {"Tour", "Cavalier", "Fou","Reine"};
+			String s = (String)JOptionPane.showInputDialog(
+			                    new JFrame(),
+			                    "Choisissez une promotion pour votre pion:\n",
+			                    "Promotion",
+			                    JOptionPane.QUESTION_MESSAGE,
+			                    
+			                    null, possibilities,
+			                    "Reine");
+
+			//If a string was returned, say so.
+			if ((s != null) && (s.length() > 0)) {
+			    chessGameControler.promotion(s,x,y);
+			}
+		}
+		else if(m.contains("partie")) {
+			int n = JOptionPane.showConfirmDialog(
+					new JLabel(),
+				    "Nouvelle Partie?",
+				    "Restart",
+				    JOptionPane.YES_NO_OPTION);
+			if(n == JOptionPane.YES_OPTION) {
+				
+			}
+//			else {
+//				layeredPane.removeAll();
+//			}
+		}
+			
+	}
 	@Override
 	public void update(Observable arg0, Object arg1) {
-		System.out.print(chessGameControler.getMessage()+'\n');
+		
+		analyseM(chessGameControler.getMessage());
 		refresh();
 		List<PieceIHM> piecesIHM = (List<PieceIHM>) arg1;
 		for(PieceIHM pieceIHM : piecesIHM) {
 			String file = ChessImageProvider.getImageFile(pieceIHM.getTypePiece(),pieceIHM.getCouleur());
 			
 			for(model.Coord position : pieceIHM.getList()) {
-				if(position.x!=-1) {
+				if(position.x>=0 && position.y>=0) {
 					JLabel piece = new JLabel(new ImageIcon(file));
 					JPanel panel = (JPanel)chessBoard.getComponent(position.x+position.y*8);
 					if(panel.getComponentCount()==0)
@@ -130,10 +176,18 @@ implements java.awt.event.MouseListener, java.awt.event.MouseMotionListener, jav
 		  {
 			  parent = c.getParent();
 		  }
-		  Point parentLocation = parent.getLocation();
-		  xFinal=(int)Math.round(parentLocation.x/(dim.width/8));
-		  yFinal=(int)Math.round(parentLocation.y/(dim.height/8));
-		  boolean res=chessGameControler.move(new Coord(xInit,yInit), new Coord(xFinal,yFinal));
+		  if(parent != null) {
+			  Point parentLocation = parent.getLocation();
+			  xFinal=(int)Math.round(parentLocation.x/(dim.width/8));
+			  yFinal=(int)Math.round(parentLocation.y/(dim.height/8));
+			 
+		  }
+		  else {
+			  xFinal=42;
+			  yFinal=42;
+		  }
+		  
+		  chessGameControler.move(new Coord(xInit,yInit), new Coord(xFinal,yFinal));
 		  layeredPane.remove(chessPiece);
 		  repaint();
 		  /*
